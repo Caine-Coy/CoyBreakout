@@ -25,9 +25,10 @@ public class GameController {
 	Thread t;
 	boolean gameRunning = true;
 	boolean gamePaused = false;
+	boolean gameEnded = false;
 	
 	int width,height,flipCooldown,score;
-	int flipCooldownMax = 5;
+	int flipCooldownMax = 2;
 	
 	//bat parameters
 	int batWidth;
@@ -68,6 +69,8 @@ public class GameController {
 	 public void startGame()
 	    {
 		 	flipCooldown = 0;
+		 	
+		 	//loads all the audiofiles into memory
 		 	batPing = new AudioClip(getClass().getResource("/resources/batPing.mp3").toString());
 		 	brickPing = new AudioClip(getClass().getResource("/resources/brickPing.mp3").toString());
 		 	brickBreak = new AudioClip(getClass().getResource("/resources/brickBreak.mp3").toString());
@@ -107,9 +110,12 @@ public class GameController {
 	    			long now = System.nanoTime();
 	    			lastTime = now;
 	    			//Display
-	    			if (!pauseDisplayed) {
+	    			if (pauseDisplayed && !gameEnded) {
 	    				graphicsContr.displayText(width/2,height/2,"PAUSED",50,Color.WHITE);
 	    				pauseDisplayed = true;
+	    			}
+	    			else if (gameEnded) {
+	    				graphicsContr.displayText(width/2,height/2,"GAME FINISHED",50,Color.WHITE);
 	    			}
 	    			
 	    		}
@@ -197,14 +203,6 @@ public class GameController {
 	    					debug.addToDebug(debugClass,"Hit left of "+b);
 	    					flipCooldown = flipCooldownMax;
 	    				}
-	    				//Bottom
-	    				else if (coyFunctions.inBounds(x,y,bX+b.width/10,bEndX-b.width/10,bY+(b.height/10),bBottomY) && flipCooldown <= 0) {
-	    					ball.bounceY();
-	    					brickPing.play(gameVolume);
-	    					b.changeHealth(-1);
-	    					debug.addToDebug(debugClass,"Hit bottom of "+b);
-	    					flipCooldown = flipCooldownMax;
-	    				}
 	    				//Right Side
 	    				else if (coyFunctions.inBounds(x, y, bEndX-b.width/10, bEndX, bY+b.height/10, bBottomY-b.height/10) &&flipCooldown <= 0) {
 	    					ball.bounceX();
@@ -213,8 +211,17 @@ public class GameController {
 	    					debug.addToDebug(debugClass,"Hit right of "+b);
 	    					flipCooldown = flipCooldownMax;
 	    				}
+	    				//Bottom
+	    				if (coyFunctions.inBounds(x,y,bX,bEndX,bBottomY-(b.height/10),bBottomY) && flipCooldown <= 0) {
+	    					ball.bounceY();
+	    					brickPing.play(gameVolume);
+	    					b.changeHealth(-1);
+	    					debug.addToDebug(debugClass,"Hit bottom of "+b);
+	    					flipCooldown = flipCooldownMax;
+	    				}
+	    				
 	    				//top
-	    				else if (coyFunctions.inBounds(x, y, bX+b.width/10,bEndX-b.width/10,bY,bY+b.height/10) && flipCooldown <= 0) {
+	    				else if (coyFunctions.inBounds(x, y, bX,bEndX,bY,bY+b.height/10) && flipCooldown <= 0) {
 	    					ball.bounceY();
 	    					brickPing.play(gameVolume);
 	    					b.changeHealth(-1);
@@ -247,8 +254,11 @@ public class GameController {
 	    	}
 	    	
 	    	if (!anyBricksInPlay()) {
-	    		ball.velocity = coyFunctions.makePoint(0, 0);
-	    		
+	    		if (!gameEnded) {
+	    			ball.velocity = coyFunctions.makePoint(0, 0);
+		    		ball.pos = coyFunctions.makePoint(width/2, height/2);
+		    		gameEnded = true;
+	    		}
 	    	}
 	    }
 	    
