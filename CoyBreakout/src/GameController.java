@@ -13,7 +13,7 @@ public class GameController {
 	GraphicsController graphicsContr;
 	CoyDebug debug;
 	CoyFunctions coyFunctions;
-	AudioClip batPing,brickBreak,brickPing,wallPing,gameMusic;
+	AudioClip batPing,brickBreak,brickPing,wallPing;
 	
 	double gameVolume = 0.1;
 	
@@ -72,11 +72,8 @@ public class GameController {
 		 	brickPing = new AudioClip(getClass().getResource("/resources/brickPing.mp3").toString());
 		 	brickBreak = new AudioClip(getClass().getResource("/resources/brickBreak.mp3").toString());
 		 	wallPing = new AudioClip(getClass().getResource("/resources/wallPing.mp3").toString());
-		 	gameMusic = new AudioClip(getClass().getResource("/resources/gameMusic.mp3").toString());
 	        initialiseGame();//Set up all the variables for a new game.
 	        graphicsContr.update();
-	        gameMusic.setCycleCount(AudioClip.INDEFINITE);
-	        //gameMusic.play(gameVolume);
 	        t = new Thread( this::gameLoop );     //Starts the gameLoop thread
 	        t.setDaemon(true);                          // Tell system this thread can die when it finishes
 	        t.start();                               // Start the thread
