@@ -136,8 +136,7 @@ public class GraphicsController implements EventHandler<KeyEvent> {
 		gc.setFill(go.colour);
 		gc.fillOval(go.x,go.y,go.width,go.height);
 	}
-	//this suppresses a warning about using the translate, but it works as intended.
-	@SuppressWarnings("static-access")
+
 	public Point moveObj(GameObj go,Point point){
 		//gc.setFill(go.colour);
 		Translate translate = go.getTranslate(); 

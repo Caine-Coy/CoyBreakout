@@ -6,27 +6,38 @@ import java.util.ArrayList;
 import java.util.Random;
 import javafx.scene.media.AudioClip;
 import javafx.scene.paint.Color;
-
+/**
+ * The Model part of the MVC pattern.
+ * In charge of backend game mechanics once the game has started.
+ */
 public class GameController {
-	//defining the other objects this class needs an instance of
+	//Variables
 	InputController inputContr;
 	GraphicsController graphicsContr;
 	CoyDebug debug;
 	CoyFunctions coyFunctions;
 	AudioClip batPing,brickBreak,brickPing,wallPing;
-	
-	double gameVolume = 0.1;
-	
+	Thread t;
+	/**
+	 * What this class calls itself in debug logs
+	 */
 	String debugClass = "Game Controller";
 	
+	//created the game object variables.
 	GameObj bat,ball,brick;
 	ArrayList<GameObj> bricks;
 	
-	Thread t;
+	/**
+	 *A double controlling game sound volume. 
+	 */
+	double gameVolume = 0.1;
+	
+	//Game Status Booleans
 	boolean gameRunning = true;
 	boolean gamePaused = false;
 	boolean gameEnded = false;
 	
+	//defines screen size, the cooldown for collisions, and game score.
 	int width,height,flipCooldown,score;
 	int flipCooldownMax = 2;
 	
@@ -53,7 +64,13 @@ public class GameController {
 	double nanoSecondPerTick = 1000000000 / gameTicksPerSecond;
 	double delta = 0;
 	boolean pauseDisplayed = false;
-	
+	/**
+	 * The Model part of the MVC pattern.
+	 * In charge of backend game mechanics once the game has started.
+	 * @param width of the screen in int
+	 * @param height of the screen in int
+	 * @param debug the debug instance created by main
+	 */
 	public GameController(int width, int height,CoyDebug debug) {
 		this.debug = debug;
 		this.width = width;
@@ -65,9 +82,12 @@ public class GameController {
 		brickHeight = (height/2)/brickRows-brickOffset;
 		debug.addToDebug(debugClass,"Brick size set at W: "+brickWidth+" H: "+brickHeight);
 	}
-	
+	/**
+	 * Starts game operations, creating the gameloop thread.
+	 */
 	 public void startGame()
-	    {
+	    {	
+		 	//sets the cooldown to 0, so it can be ticked up when collisions happen
 		 	flipCooldown = 0;
 		 	
 		 	//loads all the audiofiles into memory
@@ -75,8 +95,8 @@ public class GameController {
 		 	brickPing = new AudioClip(getClass().getResource("/resources/brickPing.mp3").toString());
 		 	brickBreak = new AudioClip(getClass().getResource("/resources/brickBreak.mp3").toString());
 		 	wallPing = new AudioClip(getClass().getResource("/resources/wallPing.mp3").toString());
-	        initialiseGame();//Set up all the variables for a new game.
-	        graphicsContr.update();
+	        initialiseGame();
+	        //graphicsContr.update();
 	        t = new Thread( this::gameLoop );     //Starts the gameLoop thread
 	        t.setDaemon(true);                          // Tell system this thread can die when it finishes
 	        t.start();                               // Start the thread

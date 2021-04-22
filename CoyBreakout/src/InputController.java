@@ -34,7 +34,6 @@ public class InputController {
 		
 	}
 	//This works, not sure what its complaining about. Warning suppressed.
-	@SuppressWarnings("incomplete-switch")
 	void userKeyInteraction(KeyEvent event ) {
 		switch ( event.getCode() )             
 	    {
