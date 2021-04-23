@@ -20,10 +20,9 @@ public class GameController {
 	CoyFunctions coyFunctions;
 	AudioClip batPing,brickBreak,brickPing,wallPing;
 	Thread t;
-	//the tick on the second.
-	int tick;
+	
 	/**
-	 * What this class calls itself in debug logs
+	 * What this class calls itself in debug logs.
 	 */
 	String debugClass = "Game Controller";
 	
@@ -43,7 +42,7 @@ public class GameController {
 	
 	//defines screen size, the cooldown for collisions, and game score.
 	int width,height,flipCooldown,score,scoreMult;
-	int flipCooldownMax = 1;
+	int flipCooldownMax = 4;
 	
 	//bat parameters
 	int batWidth;
@@ -52,12 +51,12 @@ public class GameController {
 	//ball parameters
 	int ballDiameter = 20;
 	Point ballStartingVelocity;
-	int ballSpeed = 2;
+	int ballSpeed = 3;
 	
 	//brick parameters
 	int brickWidth,brickHeight;
-	int brickColumns = 4;
-	int brickRows = 4;
+	int brickColumns = 2;
+	int brickRows = 2;
 	int brickOffset = 20;
 	int brickMaxHealth = 3;
 	
@@ -67,7 +66,7 @@ public class GameController {
 	//finds out how many nanoseconds have passed per tick
 	double nanoSecondPerTick = 1000000000 / gameTicksPerSecond;
 	double delta = 0;
-	boolean pauseDisplayed = false;
+	
 	/**
 	 * The Model part of the MVC pattern.
 	 * In charge of backend game mechanics once the game has started.
@@ -119,51 +118,25 @@ public class GameController {
 	     * The Main gameloop, runs constantly in a seperate thread
 	     * 
 	     */
+	    
 	    public void gameLoop(){
 	    	debug.addToDebug(debugClass,"Game Loop Started");
 	    	
 	    	lastTime = System.nanoTime();
 	    	while (gameRunning) {
-	    		if (!gamePaused) {
-	    			long now = System.nanoTime();
-		    		delta += (now-lastTime) / nanoSecondPerTick;
-		    		lastTime = now;
-		    		
-		    		//This runs every game update. Currently set at 60 ticks a second.
-		    		while(delta >= 1 ) {
-		    			
+	    		long now = System.nanoTime();
+		    	delta += (now-lastTime) / nanoSecondPerTick;
+		    	lastTime = now;
+		    
+		    	//This runs every game update. Currently set at 60 ticks a second.
+		    	while(delta >= 1 ) {
+		    		if (!gamePaused) {
 		    			ballUpdate();
-				    	updateGraphics();
-				    	//graphicsContr.update();
-				    	delta--;
-				    	//runs once a second, for performance reasons.
-				    	if (tick == gameTicksPerSecond) {
-				    		//brickSurroundCheck();
-				    		tick = 0;
-				    	}
-				    	if (tick == gameTicksPerSecond/30) {
-				    		
-				    		tick = 0;
-				    	}
-				    	tick++;
 		    		}
-	    		}
-	    		
-	    		else {
-	    			//keeps the delta ticking over even if nothing is updating.
-	    			//makes sure all the game operations continue as normal on unpause
-	    			long now = System.nanoTime();
-	    			lastTime = now;
-	    			
-	    			//Display
-	    			if (pauseDisplayed && !gameEnded) {
-	    				graphicsContr.displayText(width/2,height/2,"PAUSED",50,Color.WHITE);
-	    				pauseDisplayed = true;
-	    			}
-	    		}	
+				   	updateGraphics();
+				   	delta--;
+		    	}
 	    	}
-	    	 
-		
 	    	if(!gameRunning) {
 	    		System.exit(0);
 	    		
@@ -193,10 +166,12 @@ public class GameController {
 	    void ballUpdate() {
 	    	
 	    	ball = getBall();
+	    	//gets the balls next position
 	    	int x = ball.getPosX();
 			int y = ball.getPosY();
 			int endX = x+ball.width;
 			int bottomY = y+ball.height;
+			
 			//If you hit the wall this makes it bounce
 	    	if (endX >= width || x <=0) {
 	    		if (flipCooldown <= 0) {
@@ -207,6 +182,7 @@ public class GameController {
 			    		ball.bounceX();
 			    		wallPing.play(gameVolume);
 			    		debug.addToDebug(debugClass,"Ball Hit Wall");
+			    		flipCooldown = flipCooldownMax;
 	    		}	    		
 	    	}
 	    	
@@ -251,7 +227,7 @@ public class GameController {
 	    	}
 
 	    	for (GameObj b : bricks) {
-	    		if(b.getVisible() && b.isAccessible) {
+	    		if(b.getVisible()) {
 	    			int bX = b.x;
 	    			int bY = b.y;
 	    			int bEndX = b.x+b.width;
@@ -333,7 +309,7 @@ public class GameController {
 	    		}		
 	    		
 	    	}
-	    	if (ball.getPosY() >= height-(bat.height/2) && flipCooldown <=0) {
+	    	if (y >= height-(bat.height/2) && flipCooldown <=0) {
 	    		ball.resetPos();
 	    		debug.addToDebug(debugClass,"Ball Hit Bottom Of Map");
 	    		scoreMult = 1;
@@ -341,7 +317,7 @@ public class GameController {
 	    		
 	    		flipCooldown = flipCooldownMax;
 	    	}
-	    	if (ball.getPosY() <= 0 && flipCooldown <= 0) {
+	    	if (y <= 0 && flipCooldown <= 0) {
 	    		ball.bounceY();
 	    		wallPing.play(gameVolume);
 	    		debug.addToDebug(debugClass,"Ball Hit Top "+ ball.getVelocity());
@@ -360,7 +336,7 @@ public class GameController {
 	    			ball.velocity = coyFunctions.makePoint(0, 0);
 		    		ball.pos = coyFunctions.makePoint(width/2, height/2);
 		    		gameEnded = true;
-		    		graphicsContr.displayText(width, height, "!!!FINISHED!!!", 50, Color.MEDIUMPURPLE);
+		    		
 	    		}
 	    	}
 	    }
@@ -374,8 +350,11 @@ public class GameController {
 	    	return false;
 	    }
 	    
+	    /**
+	     * Makes a bat in the middle of the screen
+	     * @return the gameObj of the bat
+	     */
 	    public GameObj makeBat() {
-	    	//makes a bat in the middle of the screen. Coords are from top left for some reason.
 	    	debug.addToDebug(debugClass,"Attempting to make bat");
 	    	bat = new GameObj((width/2)-(batWidth/2), height-20, batWidth, batHeight,coyFunctions.makePoint(0, 0), Color.RED, debug,false,"bat");  
 	    	bat.initialize(graphicsContr);
@@ -383,7 +362,10 @@ public class GameController {
 	    	
 	    	return(bat);
 	    }
-	    
+	    /**
+	     * Makes the ball in a random location on the screen.
+	     * @return the gameobject of the ball
+	     */
 	    public GameObj makeBall() {
 	    	debug.addToDebug(debugClass,"Attempting to make ball");
 	    	Random random = new Random();
@@ -394,6 +376,13 @@ public class GameController {
 			return ball;
 	    	}
 	    
+	    /**
+	     * Makes a brick at the requested coordinates with the given health
+	     * @param x int coordinate of the brick
+	     * @param y int coordinate of the brick
+	     * @param int health of the brick
+	     * @return the brick game object
+	     */
 	    public GameObj makeBrick(int x,int y,int health) {
 	    	debug.addToDebug(debugClass,"Attempting to make brick");
 	    	brick = new GameObj(x, y, brickWidth, brickHeight, coyFunctions.makePoint(0, 0), Color.RED, debug, false,"brick");

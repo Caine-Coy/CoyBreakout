@@ -61,7 +61,6 @@ public class InputController {
 	    	  	else {
 	    	  		paused = false;
 	    	  		gameContr.gamePaused = false;
-	    	  		gameContr.pauseDisplayed = false;
 	    	  		debug.addToDebug(debugClass,"Game Restarted");
 	    	  	}
 	    	  break;

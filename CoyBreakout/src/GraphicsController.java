@@ -16,7 +16,11 @@ import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
-
+/**
+ * 
+ * @author 'Caine'/ Joe Benson
+ *
+ */
 public class GraphicsController implements EventHandler<KeyEvent> {
 	
 	int width,height;
@@ -37,7 +41,12 @@ public class GraphicsController implements EventHandler<KeyEvent> {
 	long tick;
 	
 	
-	
+	/**
+	 * 
+	 * @param w int width of screen
+	 * @param h int height of screen
+	 * @param debug instance from the parent object.
+	 */
 	public GraphicsController(int w,int h,CoyDebug debug) {
 		this.width = w;
 		this.height = h;
@@ -45,6 +54,10 @@ public class GraphicsController implements EventHandler<KeyEvent> {
 		this.coyFunctions = debug.coyFunctions;
 	}
 	
+	/**
+	 * JavaFX start object
+	 * @param The stage you want to start the game rendering in.
+	 */
 	public void start(Stage window) {
 		
 		//set the window title
@@ -101,7 +114,16 @@ public class GraphicsController implements EventHandler<KeyEvent> {
 	public void updateUI() {
 		
 			String scoreText = "Score: "+gameContr.score;
-			displayText(width/2,height/2,scoreText + " | ScoreX "+gameContr.scoreMult,15,Color.WHITE);
+			
+			if (gameContr.gamePaused) {
+				displayText(width/2,height/2,"PAUSED",50,Color.WHITE);
+			}
+			else if (gameContr.gameEnded) {
+				displayText(width/2, height/2, "!!!FINISHED!!!", 50, Color.MEDIUMPURPLE);
+			}
+			else {
+				displayText(width/2,height/2,scoreText + " | ScoreX "+gameContr.scoreMult,15,Color.WHITE);
+			}
 			
 		}
 	
