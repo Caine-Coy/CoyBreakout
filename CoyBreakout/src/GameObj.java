@@ -7,20 +7,39 @@ import java.util.ArrayList;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Translate;
 
+/**
+ * 
+ * @author 'Caine'/Joe Benson
+ * This is the gameObject type class.
+ * Used for all onscreen objects that move.
+ *
+ */
 public class GameObj {
 	
 	GraphicsController graphicsContr;
 	GameController gameContr;
 	Point pos,startVelocity,velocity;
 	Color colour;
-	int width,height,x,y,startX,startY,health,brickArrayX,brickArrayY;
+	int width,height,x,y,startX,startY,health,brickArrayX,brickArrayY,angle;
 	String name,debugClass,type;
 	CoyDebug debug;
-	boolean circular,visible,isAccessible;
+	boolean circular,visible;
 	Translate translate;
 	CoyFunctions coyFunctions;
 	
-	public GameObj( int x, int y, int w, int h,Point velocity, Color c,CoyDebug debug,boolean circular,String type)
+	/**
+	 * 
+	 * @param x int coordinate of the object
+	 * @param y int coordinate of the object
+	 * @param w int width of the object
+	 * @param h int height of the object
+	 * @param velocity point velocity of the object
+	 * @param c colour of the object
+	 * @param debug instance to be passed from the parent object
+	 * @param isCircular Boolean. is the object going to be drawn as a circle
+	 * @param type String what type of object is this? Mostly for naming purposes in the log.
+	 */
+	public GameObj( int x, int y, int w, int h,Point velocity, Color c,CoyDebug debug,boolean isCircular,String type)
     {
 		this.velocity = new Point();
 		this.startVelocity = new Point();
@@ -47,19 +66,13 @@ public class GameObj {
         
         this.type = type;
         
-        
+        angle = 1;
         
         colour = c;
-        this.circular = circular;
+        this.circular = isCircular;
         
         translate = new Translate();
         visible = true;
-        
-        
-        
-        //an unfinished attempt to add smarter collision
-        isAccessible = true;
-
     }
 	
 	public void initialize(GraphicsController graphicsContr) {
@@ -130,10 +143,20 @@ public class GameObj {
 	public int getPosX() {	
 		return x;
 	}
+	
+	public void setPosX(int x) {
+		this.x = x;
+	}
 	public int getPosY() {
 		return y;
 	}
-	
+	public void setPosY(int y) {
+		this.y = y;
+	}
+	public void setPos(Point point) {
+		setPosX(point.x);
+		setPosY(point.y);
+	}
 	public Translate getTranslate() {
 		return translate;
 	}
@@ -188,51 +211,6 @@ public class GameObj {
 	public int getHealth() {
 		return health;
 	}
-	
-	//unfinished attempt to make smarter collision
-	/*
-	public boolean isSurroundedX(ArrayList<GameObj> bricks) {
-		if (brickArrayX > 0 && brickArrayX < gameContr.brickColumns-1) {
-			if (!getFromBrickArray(brickArrayX-1,brickArrayY,bricks).getVisible()) {
-				if (!getFromBrickArray(brickArrayX + 1,brickArrayY,bricks).getVisible()) {
-					return true;
-				}
-			}
-		}
-		else if (brickArrayX == 0) {
-			if (!getFromBrickArray(brickArrayX + 1,brickArrayY,bricks).getVisible()) {
-				return true;
-			}
-		}
-		else if (brickArrayX == gameContr.brickColumns-1) {
-			if (!getFromBrickArray(brickArrayX-1,brickArrayY,bricks).getVisible()) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	public boolean isSurroundedY(ArrayList<GameObj> bricks) {
-		if (brickArrayY > 0 && brickArrayY < gameContr.brickRows-1) {
-			if (!getFromBrickArray(brickArrayX,brickArrayY-1,bricks).getVisible()) {
-				if (!getFromBrickArray(brickArrayX ,brickArrayY+1,bricks).getVisible()) {
-					return true;
-				}
-			}
-		}
-		else if (brickArrayY == 0) {
-			if (!getFromBrickArray(brickArrayX,brickArrayY+1,bricks).getVisible()) {
-				return true;
-			}
-		}
-		else if (brickArrayY == gameContr.brickRows-1) {
-			if (!getFromBrickArray(brickArrayX,brickArrayY-1,bricks).getVisible()) {
-				return true;
-			}
-		}
-		return false;
-	}
-	*/
 	
 	public GameObj getFromBrickArray(int x,int y,ArrayList<GameObj> bricks) {
 		for (GameObj b:bricks) {

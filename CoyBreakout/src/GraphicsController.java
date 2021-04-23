@@ -16,7 +16,11 @@ import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
-
+/**
+ * 
+ * @author 'Caine'/ Joe Benson
+ *
+ */
 public class GraphicsController implements EventHandler<KeyEvent> {
 	
 	int width,height;
@@ -36,8 +40,15 @@ public class GraphicsController implements EventHandler<KeyEvent> {
 	int brickHealth;
 	long tick;
 	
+	//Fun End Game Stuff
+	Color finishingTextColor = Color.PURPLE;
 	
-	
+	/**
+	 * 
+	 * @param w int width of screen
+	 * @param h int height of screen
+	 * @param debug instance from the parent object.
+	 */
 	public GraphicsController(int w,int h,CoyDebug debug) {
 		this.width = w;
 		this.height = h;
@@ -45,6 +56,10 @@ public class GraphicsController implements EventHandler<KeyEvent> {
 		this.coyFunctions = debug.coyFunctions;
 	}
 	
+	/**
+	 * JavaFX start object
+	 * @param The stage you want to start the game rendering in.
+	 */
 	public void start(Stage window) {
 		
 		//set the window title
@@ -54,11 +69,26 @@ public class GraphicsController implements EventHandler<KeyEvent> {
 	     Canvas canvas = new Canvas (height,width);
 	     gc = canvas.getGraphicsContext2D();
 	     //tells the game controller it is ready to make a bat.
-	     bat = gameContr.makeBat();
+	     startGame();
+	     Group root = new Group(canvas);
+	     Scene gameScene = new Scene (root);
+	     window.setScene(gameScene);
+	     
+	     //display
+	     window.show();
+	     gameScene.setOnKeyPressed(this);
+	     debug.addToDebug(debugClass,"Window Initialized");
+	}
+	
+	public void startGame() {
+		 bat = null;
+		 ball = null;
+		 bat = gameContr.makeBat();
 	     ball = gameContr.makeBall();
 	     
 	     //makes bricks
 	     brickHealth = gameContr.getBrickMaxHealth();
+	     bricks = null;
 	     bricks = new ArrayList<GameObj>();
 	     Random rand = new Random();
 	     for (int x = 0; x < gameContr.brickColumns;x++) {
@@ -70,18 +100,12 @@ public class GraphicsController implements EventHandler<KeyEvent> {
 	    		 bricks.add(brick);
 	    	 }
 	     }
-	     
 	     gameContr.bricks = bricks;   
-	     Group root = new Group(canvas);
-	     Scene gameScene = new Scene (root);
-	     window.setScene(gameScene);
-	     
-	     //display
-	     window.show();
-	     gameScene.setOnKeyPressed(this);
-	     debug.addToDebug(debugClass,"Window Initialized");
 	}
 	
+	/**
+	 * This is in control of the keyEvent, so whenever a key has been detected this fires.
+	 */
 	 public void handle(KeyEvent event)
 	    {
 	        // send the event to the controller
@@ -101,7 +125,19 @@ public class GraphicsController implements EventHandler<KeyEvent> {
 	public void updateUI() {
 		
 			String scoreText = "Score: "+gameContr.score;
-			displayText(width/2,height/2,scoreText + " | ScoreX "+gameContr.scoreMult,15,Color.WHITE);
+			
+			if (gameContr.gamePaused) {
+				displayText(width/2,height/2,"PAUSED",50,Color.WHITE);
+				displayText(width/2, height-100, "PRESS SPACE TO UNPAUSE!", 10, Color.WHITE);
+			}
+			else if (gameContr.gameEnded) {
+				displayText(width/2, height/2, "!!!FINISHED!!!", 50, finishingTextColor);
+				displayText(width/2, height/2+50, "FINAL SCORE : "+gameContr.score, 30, finishingTextColor);
+				displayText(width/2, height-75, "PRESS ENTER TO RESTART!", 20, finishingTextColor);
+			}
+			else {
+				displayText(width/2,height/2,scoreText + " | ScoreX "+gameContr.scoreMult,15,Color.WHITE);
+			}
 			
 		}
 	
@@ -113,7 +149,11 @@ public class GraphicsController implements EventHandler<KeyEvent> {
 		
 		displayRectObj(bat);
 	    displayRoundObj(ball);
-	   
+	    if (gameContr.gameEnded) {
+	    	for (GameObj b: gameContr.balls) {
+	    		displayRoundObj(b);
+	    	}
+	    }
 	    for(GameObj b : bricks) {
 	    	if (b.getVisible()) {
 	    		displayRectObj(b);
