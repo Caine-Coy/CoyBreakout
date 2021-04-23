@@ -37,22 +37,21 @@ public class InputController {
 	void userKeyInteraction(KeyEvent event ) {
 		switch ( event.getCode() )             
 	    {
-	      case LEFT:   // Left Arrow
-	    	  //debug.addToDebug(debugClass,"Key input Left");
-	    	  if(bat.getPosX()>=5&&!paused) {
+	      case LEFT:
+	      case A:
+	    	  if(bat.getPosX()>=batSpeed&&!paused) {
 	    		  bat.movePos(coyFunctions.makePoint(-batSpeed, 0));
 	    	  }
 	        break;
-	      case RIGHT:   // Right Arrow
-	    	  //debug.addToDebug(debugClass,"Key input Right");
-	    	  if(bat.getPosX()<=width-bat.width-5&&!paused) {
-	    		  bat.movePos(coyFunctions.makePoint(batSpeed, 0));
+	      case RIGHT:
+	      case D:
+	       	  if(bat.getPosX()<=width-bat.width-batSpeed&&!paused) {
+	       		  bat.movePos(coyFunctions.makePoint(batSpeed, 0));
 	    	  }
 	        break;
 	      case ESCAPE:
 	    	  	gameContr.gameRunning = false;
 	    	  break;
-	    	  //Fun Buttons :)
 	      case SPACE:
 	    	  	if (!paused) {
 	    	  		paused = true;

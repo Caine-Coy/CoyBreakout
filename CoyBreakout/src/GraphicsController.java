@@ -64,6 +64,9 @@ public class GraphicsController implements EventHandler<KeyEvent> {
 	     for (int x = 0; x < gameContr.brickColumns;x++) {
 	    	 for (int y= 0; y <gameContr.brickRows;y++) {
 	    		 brick = gameContr.makeBrick((x)+x*gameContr.brickWidth+x,y*gameContr.brickHeight+y,coyFunctions.clamp(rand.nextInt(brickHealth+1), 1, brickHealth));
+	    		 brick.brickArrayX = x;
+	    		 brick.brickArrayY = y;
+	    		 brick.initialize(this);
 	    		 bricks.add(brick);
 	    	 }
 	     }
@@ -98,7 +101,7 @@ public class GraphicsController implements EventHandler<KeyEvent> {
 	public void updateUI() {
 		
 			String scoreText = "Score: "+gameContr.score;
-			displayText(width/2,height/2,scoreText,15,Color.WHITE);
+			displayText(width/2,height/2,scoreText + " | ScoreX "+gameContr.scoreMult,15,Color.WHITE);
 			
 		}
 	

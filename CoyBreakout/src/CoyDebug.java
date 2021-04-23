@@ -35,5 +35,12 @@ public class CoyDebug {
 		System.out.println(currDebugLog);
 	}
 	
+	public void error(String callingObject, Exception e) {
+		date = java.util.Calendar.getInstance().getTime();
+		String currDebugLog = (date+" : CRITICAL ERROR!: " +callingObject+ " : " + e.getMessage());
+		debugLog.push(currDebugLog);
+		System.out.println(currDebugLog);
+	}
+	
 	
 }
