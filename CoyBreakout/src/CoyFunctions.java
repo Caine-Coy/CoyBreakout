@@ -1,13 +1,24 @@
 package src;
 
-
 import java.awt.Point;
+/**
+ * 
+ * @author 'Caine'/Joe Benson
+ * A class that holds valuable methods used by all. For easily readable code.
+ * @version 1
+ *
+ */
 
 public class CoyFunctions {
 	
 	CoyDebug debug;
 	String debugClass = "CoyFunctions";
-	//Turns Precise coordinates into a Point for easy passing.
+	/**
+	 * 
+	 * @param x int coordinate
+	 * @param y int coordinate
+	 * @return a point made of x and Y
+	 */
 	public Point makePoint(int x,int y) {
 		Point point = new Point();
 		point.x = x;
@@ -17,7 +28,15 @@ public class CoyFunctions {
 		
 	}
 	
-	 //for some reason java doesn't have a clamp method? Made my own. Clamps numbers to a range.
+	 /**Clamps a value between two values.
+	  * Returns min value if below min,
+	  * Returns max value if above max.
+	  *
+	  * @param value in double
+	  * @param min value output in double
+	  * @param max value output in double
+	  * @return clamped value
+	  */
     public double clamp(double value, double min,double max) {
 
 		if (value < min) {
@@ -32,7 +51,16 @@ public class CoyFunctions {
 		
     }
     
-    //override with int values instead;
+    /**Clamps a value between two values.
+	  * Returns min value if below min,
+	  * Returns max value if above max.
+	  * This is the override for int.
+	  *
+	  * @param value in int
+	  * @param min value output in int
+	  * @param max value output in int
+	  * @return clamped value
+	  */
     public int clamp(int value, int min,int max) {
 
 		if (value < min) {
@@ -47,6 +75,16 @@ public class CoyFunctions {
 		
     }
     
+    /**Simplify the bounding system so it is easy to manipulate.
+     * 
+     * @param int x of hitting object
+     * @param int y of hitting object 
+     * @param int minX of collided object
+     * @param int maxX of collided object
+     * @param int minY of collided object
+     * @param int maxY of collided object
+     * @return if in bounds or not.
+     */
     public boolean inBounds(int x,int y,int minX,int maxX,int minY,int maxY) {
     	if (x >= minX) {
     		if (x <= maxX) {
@@ -59,10 +97,4 @@ public class CoyFunctions {
     	}
     	return false;
     }
-    
-    /*public boolean isEven(long num) {
-    	//checks if the rightmost bit is 0, if its 0, its an even number. Else its odd.
-		return ((num & 0x1)==0);
-    	
-    }*/
 }

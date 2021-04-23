@@ -2,6 +2,7 @@ package src;
 
 
 import java.awt.Point;
+import java.util.ArrayList;
 
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Translate;
@@ -12,15 +13,14 @@ public class GameObj {
 	GameController gameContr;
 	Point pos,startVelocity,velocity;
 	Color colour;
-	int width,height,x,y,startX,startY;
-	String name,debugClass;
+	int width,height,x,y,startX,startY,health,brickArrayX,brickArrayY;
+	String name,debugClass,type;
 	CoyDebug debug;
-	boolean circular,visible;
+	boolean circular,visible,isAccessible;
 	Translate translate;
 	CoyFunctions coyFunctions;
-	int health;
 	
-	public GameObj( int x, int y, int w, int h,Point velocity, Color c,CoyDebug debug,boolean circular)
+	public GameObj( int x, int y, int w, int h,Point velocity, Color c,CoyDebug debug,boolean circular,String type)
     {
 		this.velocity = new Point();
 		this.startVelocity = new Point();
@@ -31,28 +31,49 @@ public class GameObj {
         pos = new Point();
         this.pos.x=x;
         this.pos.y=y;
-        this.debug = debug;
-        coyFunctions = debug.coyFunctions;
-        name = ""+this;
-        debugClass = "GameObj: " + this + "";
         width  = w; 
         height = h; 
-        colour = c;
-        this.circular = circular;
-        debug.addToDebug(debugClass,name+" created with colour "+colour);
-        translate = new Translate();
-        visible = true;
-        
         this.velocity.x = velocity.x;
         this.velocity.y = velocity.y;
         this.startVelocity.x= velocity.x;
         this.startVelocity.y = velocity.y;
+        
+        //invinsible objects have -1 health. bricks get health set later.
         health = -1;
+        
+        //Passing instances of coydebug and coyfunction
+        this.debug = debug;
+        coyFunctions = debug.coyFunctions;
+        
+        this.type = type;
+        
+        
+        
+        colour = c;
+        this.circular = circular;
+        
+        translate = new Translate();
+        visible = true;
+        
+        
+        
+        //an unfinished attempt to add smarter collision
+        isAccessible = true;
 
     }
 	
 	public void initialize(GraphicsController graphicsContr) {
 		this.graphicsContr = graphicsContr;
+		name = ""+this;
+		if (type == "brick") {
+			debugClass = "GameObj: " + type + "@ " +brickArrayX + " : " + brickArrayY;
+			name = type + "@ " +brickArrayX + " : " + brickArrayY;
+		}
+		else {
+			debugClass = "GameObj: " + type;
+			name = type;
+		}
+		debugClass = "GameObj: " + type + "";
 	}
 	
 	public Color getColour() {
@@ -68,7 +89,6 @@ public class GameObj {
 		moveY(pos.y);
 		this.pos.x=x;
         this.pos.y=y;
-		//debug.addToDebug(debugClass,this+" Moved at Velocity: "+ velocity +" To " + this.pos);
 	}
 	
 	//moves on the X axis and returns the new x
@@ -135,7 +155,7 @@ public class GameObj {
 	
 	public void setHealth(int health) {
 		this.health = health;
-		debug.addToDebug(debugClass,"Setting health of "+this+" to "+ health);
+		debug.addToDebug(debugClass,"Setting health of "+getName()+" to "+ health);
 	}
 	
 	public void setVisible(boolean visible) {
@@ -169,4 +189,63 @@ public class GameObj {
 		return health;
 	}
 	
+	//unfinished attempt to make smarter collision
+	/*
+	public boolean isSurroundedX(ArrayList<GameObj> bricks) {
+		if (brickArrayX > 0 && brickArrayX < gameContr.brickColumns-1) {
+			if (!getFromBrickArray(brickArrayX-1,brickArrayY,bricks).getVisible()) {
+				if (!getFromBrickArray(brickArrayX + 1,brickArrayY,bricks).getVisible()) {
+					return true;
+				}
+			}
+		}
+		else if (brickArrayX == 0) {
+			if (!getFromBrickArray(brickArrayX + 1,brickArrayY,bricks).getVisible()) {
+				return true;
+			}
+		}
+		else if (brickArrayX == gameContr.brickColumns-1) {
+			if (!getFromBrickArray(brickArrayX-1,brickArrayY,bricks).getVisible()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public boolean isSurroundedY(ArrayList<GameObj> bricks) {
+		if (brickArrayY > 0 && brickArrayY < gameContr.brickRows-1) {
+			if (!getFromBrickArray(brickArrayX,brickArrayY-1,bricks).getVisible()) {
+				if (!getFromBrickArray(brickArrayX ,brickArrayY+1,bricks).getVisible()) {
+					return true;
+				}
+			}
+		}
+		else if (brickArrayY == 0) {
+			if (!getFromBrickArray(brickArrayX,brickArrayY+1,bricks).getVisible()) {
+				return true;
+			}
+		}
+		else if (brickArrayY == gameContr.brickRows-1) {
+			if (!getFromBrickArray(brickArrayX,brickArrayY-1,bricks).getVisible()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	*/
+	
+	public GameObj getFromBrickArray(int x,int y,ArrayList<GameObj> bricks) {
+		for (GameObj b:bricks) {
+			if (b.brickArrayX == x) {
+				if (b.brickArrayY == y) {
+					return b;
+				}
+			}
+	}
+		return null;
+	}
+	public String getName() {
+		return name;
+	}
 }
+
