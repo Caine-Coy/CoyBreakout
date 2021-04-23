@@ -37,7 +37,7 @@ public class GameController {
 	
 	//Game Status Booleans
 	boolean gameRunning = true;
-	boolean gamePaused = false;
+	boolean gamePaused = true;
 	boolean gameEnded = false;
 	
 	//defines screen size, the cooldown for collisions, and game score.
@@ -53,10 +53,14 @@ public class GameController {
 	Point ballStartingVelocity;
 	int ballSpeed = 3;
 	
+	//Fun end game stuff
+	int endBalls = 18;
+	ArrayList<GameObj> balls;
+	
 	//brick parameters
 	int brickWidth,brickHeight;
-	int brickColumns = 2;
-	int brickRows = 2;
+	int brickColumns = 1;
+	int brickRows = 1;
 	int brickOffset = 20;
 	int brickMaxHealth = 3;
 	
@@ -90,7 +94,7 @@ public class GameController {
 	 public void startGame()
 	    {	
 		 	//sets the cooldown to 0, so it can be ticked up when collisions happen
-		 	flipCooldown = 0;
+		 	
 		 	
 		 	//loads all the audiofiles into memory
 		 	batPing = new AudioClip(getClass().getResource("/resources/batPing.mp3").toString());
@@ -112,6 +116,7 @@ public class GameController {
 	    {       
 	    	score = 0;
 	    	scoreMult=1;
+	    	flipCooldown = 0;
 	    }
 	    
 	    /**
@@ -143,202 +148,217 @@ public class GameController {
 	    	}
 	    		
 	    }
-	    /**
-	     * <h1> UNFINISHED </h1>
-	     * Checks to see if the bricks are accessible. <br> Updates the bricks isAccessible variable.
-	     * 
-	     */
-	    void brickSurroundCheck() {
-	    	/*
-	    	for  (GameObj b :bricks) {
-	    		if (b.isSurroundedX(bricks) && b.isSurroundedY(bricks)) {
-	    			b.isAccessible = false;
-	    		}
-	    	}
-	    	*/
-	    }
-	    
-	    
 	    
 	    /**
 	     * updates the ball position
 	     */
 	    void ballUpdate() {
-	    	
 	    	ball = getBall();
-	    	//gets the balls next position
 	    	int x = ball.getPosX();
 			int y = ball.getPosY();
 			int endX = x+ball.width;
 			int bottomY = y+ball.height;
 			
-			//If you hit the wall this makes it bounce
-	    	if (endX >= width || x <=0) {
-	    		if (flipCooldown <= 0) {
-	    			if (y <= 0) {
-	    				//This stops a bug where it would get stuck in the corner hitting both at once.
-		    			ball.bounceY();
+	    	if (gameEnded) {
+	    		for (GameObj b:balls) {
+	    			b.setPosX((int)((width/2)-10+width/3*Math.cos(Math.toRadians(b.angle))));
+		    		b.setPosY((int)((height/2)-30+height/3*Math.sin(Math.toRadians(b.angle))));
+		    		b.setColour(Color.rgb(b.angle/2, b.x/2, b.y/2));
+		    		if (b.angle < 359) {
+		    			b.angle+= 5;
 		    		}
-			    		ball.bounceX();
-			    		wallPing.play(gameVolume);
-			    		debug.addToDebug(debugClass,"Ball Hit Wall");
-			    		flipCooldown = flipCooldownMax;
-	    		}	    		
-	    	}
-	    	
-	    	if (ball.overlapping(bat)) {
-	    		int batX = bat.x;
-    			int batY = bat.y;
-    			int batEndX = bat.x+bat.width;
-    			int batBottomY = bat.y+bat.height;
-    			//Left Side
-	    		if (coyFunctions.inBounds(x, y, batX, batX+bat.width/5, batY, batBottomY)) {
-	    			ball.bounceX();
-	    			ball.bounceY();
-	    			debug.addToDebug(debugClass,"Ball Hit Bat On The Left Side");
-	    			batPing.play(gameVolume);
-	    			
-	    			flipCooldown = flipCooldownMax;
+		    		else {
+		    			b.angle = 0;
+		    		}
 	    		}
-	    		//Right Side
-	    		else if (coyFunctions.inBounds(endX, y, batEndX-bat.width/5, batBottomY, batY, batBottomY)) {
-	    			ball.bounceX();
-	    			ball.bounceY();
-	    			debug.addToDebug(debugClass,"Ball Hit Bat On The right Side");
-	    			batPing.play(gameVolume);
-	    			flipCooldown = flipCooldownMax;
-	    		}
-	    		//Top
-	    		else if (coyFunctions.inBounds(x, bottomY, batX, batEndX, batY, batBottomY-bat.height/5)) {
-	    			ball.bounceY();
-	    			debug.addToDebug(debugClass,"Ball Hit Bat On The Top");
-	    			batPing.play(gameVolume);
-	    			flipCooldown = flipCooldownMax;
-	    		}
-	    		//Bottom
-	    		else if (coyFunctions.inBounds(x, y, batX, batEndX, batBottomY-bat.height, batBottomY)) {
-	    			debug.addToDebug(debugClass,"Ball Hit Bat On The Bottom");
-	    			ball.resetPos();
-	    			addScore(-10);
-	    			flipCooldown = flipCooldownMax;
-	    		}
-	    		
-	    		
-	    	}
-
-	    	for (GameObj b : bricks) {
-	    		if(b.getVisible()) {
-	    			int bX = b.x;
-	    			int bY = b.y;
-	    			int bEndX = b.x+b.width;
-	    			int bBottomY = b.y+b.height;
-	    			
-	    			if (ball.overlapping(b)) {
-	    				//Left Side
-	    				if (coyFunctions.inBounds(endX, y,bX,bX+(b.width/10), bY, bBottomY)) {
-	    					brickPing.play(gameVolume);
-	    					b.changeHealth(-1);
-	    					if (flipCooldown <= 0) {
-	    						ball.bounceX();
-		    					
-		    					flipCooldown = flipCooldownMax;
-		    					debug.addToDebug(debugClass,"Hit left of "+b.getName());
-	    					}
-	    					else {
-	    						debug.addToDebug(debugClass, "Hit left of "+b.getName()+" but on flip cooldown, score");
-	    						scoreMult = scoreMult * 2;
-	    						
-	    					}
-	    					
-	    					
-	    					
-	    				}
-	    				//Right Side
-	    				else if (coyFunctions.inBounds(x, y, bEndX-b.width/10, bEndX, bY, bBottomY)) {
-	    					brickPing.play(gameVolume);
-	    					b.changeHealth(-1);
-	    					if (flipCooldown <= 0) {
-	    						ball.bounceX();
-	    						debug.addToDebug(debugClass,"Hit right of "+b.getName());
-		    					flipCooldown = flipCooldownMax;
-	    					}
-	    					else {
-	    						debug.addToDebug(debugClass,"Hit right of "+b.getName()+" but on flip cooldown");
-	    						scoreMult = scoreMult * 2;
-	    					}
-	    					
-	    					
-	    					
-	    				}
-	    				//Bottom
-	    				else if (coyFunctions.inBounds(x,y,bX,bEndX,bBottomY-(b.height/5),bBottomY)) {
-	    					brickPing.play(gameVolume);
-	    					b.changeHealth(-1);
-	    					if (flipCooldown <= 0) {
-	    						ball.bounceY();
-	    						debug.addToDebug(debugClass,"Hit bottom of "+b.getName());
-		    					flipCooldown = flipCooldownMax;
-	    					}
-	    					else {
-	    						debug.addToDebug(debugClass,"Hit bottom of "+b.getName()+" but on flip cooldown");
-	    						scoreMult = scoreMult * 2;
-	    					}
-	    					
-	    					
-	    				}
-	    				
-	    				//top
-	    				else if (coyFunctions.inBounds(x, bottomY, bX,bEndX,bY,bY+b.height/10)) {
-	    					brickPing.play(gameVolume);
-	    					b.changeHealth(-1);
-	    					if (flipCooldown <= 0) {
-	    						ball.bounceY();
-	    						debug.addToDebug(debugClass,"Hit top of "+b.getName());
-	    						flipCooldown = flipCooldownMax;
-	    					}
-	    					else {
-	    						debug.addToDebug(debugClass,"Hit top of "+b.getName()+" but on flip cooldown");
-	    						scoreMult = scoreMult * 2;
-	    					}
-	    					
-	    					
-	    					
-	    				}
-	    			}
-	    				
-	    		}		
-	    		
-	    	}
-	    	if (y >= height-(bat.height/2) && flipCooldown <=0) {
-	    		ball.resetPos();
-	    		debug.addToDebug(debugClass,"Ball Hit Bottom Of Map");
-	    		scoreMult = 1;
-	    		addScore(-5);
-	    		
-	    		flipCooldown = flipCooldownMax;
-	    	}
-	    	if (y <= 0 && flipCooldown <= 0) {
-	    		ball.bounceY();
-	    		wallPing.play(gameVolume);
-	    		debug.addToDebug(debugClass,"Ball Hit Top "+ ball.getVelocity());
-	    		flipCooldown = flipCooldownMax;
+	    		graphicsContr.finishingTextColor= Color.rgb(ball.x/2, ball.y/2, ball.x/2);
+	    		bat.colour = Color.rgb(ball.x/2, ball.y/2, ball.x/2);
+	    		bat.setPosX((int)((width/2)-bat.width/2+width/3*Math.cos(Math.toRadians(ball.angle))));
+	    		bat.setPosY((int)((height/2)-30+height/3*Math.sin(Math.toRadians(ball.angle))));
 	    		
 	    	}
 	    	else {
-	    		ball.movePos(ball.getVelocity());
 	    		
-	    		flipCooldown--;
-	    		flipCooldown = (int)coyFunctions.clamp(flipCooldown,0,flipCooldownMax);
+				
+				//Integer.toString(x);
+				//If you hit the wall this makes it bounce
+		    	if (endX >= width || x <=0) {
+		    		if (flipCooldown <= 0) {
+		    			if (y <= 0) {
+		    				//This stops a bug where it would get stuck in the corner hitting both at once.
+			    			ball.bounceY();
+			    		}
+				    		ball.bounceX();
+				    		wallPing.play(gameVolume);
+				    		debug.addToDebug(debugClass,"Ball Hit Wall");
+				    		flipCooldown = flipCooldownMax;
+		    		}	    		
+		    	}
+		    	
+		    	if (ball.overlapping(bat)) {
+		    		int batX = bat.x;
+	    			int batY = bat.y;
+	    			int batEndX = bat.x+bat.width;
+	    			int batBottomY = bat.y+bat.height;
+	    			//Left Side
+		    		if (coyFunctions.inBounds(x, y, batX, batX+bat.width/5, batY, batBottomY)) {
+		    			ball.bounceX();
+		    			ball.bounceY();
+		    			debug.addToDebug(debugClass,"Ball Hit Bat On The Left Side");
+		    			batPing.play(gameVolume);
+		    			
+		    			flipCooldown = flipCooldownMax;
+		    		}
+		    		//Right Side
+		    		else if (coyFunctions.inBounds(endX, y, batEndX-bat.width/5, batBottomY, batY, batBottomY)) {
+		    			ball.bounceX();
+		    			ball.bounceY();
+		    			debug.addToDebug(debugClass,"Ball Hit Bat On The right Side");
+		    			batPing.play(gameVolume);
+		    			flipCooldown = flipCooldownMax;
+		    		}
+		    		//Top
+		    		else if (coyFunctions.inBounds(x, bottomY, batX, batEndX, batY, batBottomY-bat.height/5)) {
+		    			ball.bounceY();
+		    			debug.addToDebug(debugClass,"Ball Hit Bat On The Top");
+		    			batPing.play(gameVolume);
+		    			flipCooldown = flipCooldownMax;
+		    		}
+		    		//Bottom
+		    		else if (coyFunctions.inBounds(x, y, batX, batEndX, batBottomY-bat.height, batBottomY)) {
+		    			debug.addToDebug(debugClass,"Ball Hit Bat On The Bottom");
+		    			ball.resetPos();
+		    			addScore(-10);
+		    			flipCooldown = flipCooldownMax;
+		    		}
+		    		
+		    		
+		    	}
+
+		    	for (GameObj b : bricks) {
+		    		if(b.getVisible()) {
+		    			int bX = b.x;
+		    			int bY = b.y;
+		    			int bEndX = b.x+b.width;
+		    			int bBottomY = b.y+b.height;
+		    			
+		    			if (ball.overlapping(b)) {
+		    				//Left Side
+		    				if (coyFunctions.inBounds(endX, y,bX,bX+(b.width/10), bY, bBottomY)) {
+		    					brickPing.play(gameVolume);
+		    					b.changeHealth(-1);
+		    					if (flipCooldown <= 0) {
+		    						ball.bounceX();
+			    					
+			    					flipCooldown = flipCooldownMax;
+			    					debug.addToDebug(debugClass,"Hit left of "+b.getName());
+		    					}
+		    					else {
+		    						debug.addToDebug(debugClass, "Hit left of "+b.getName()+" but on flip cooldown, score");
+		    						scoreMult = scoreMult * 2;
+		    						
+		    					}
+		    					
+		    					
+		    					
+		    				}
+		    				//Right Side
+		    				else if (coyFunctions.inBounds(x, y, bEndX-b.width/10, bEndX, bY, bBottomY)) {
+		    					brickPing.play(gameVolume);
+		    					b.changeHealth(-1);
+		    					if (flipCooldown <= 0) {
+		    						ball.bounceX();
+		    						debug.addToDebug(debugClass,"Hit right of "+b.getName());
+			    					flipCooldown = flipCooldownMax;
+		    					}
+		    					else {
+		    						debug.addToDebug(debugClass,"Hit right of "+b.getName()+" but on flip cooldown");
+		    						scoreMult = scoreMult * 2;
+		    					}
+		    					
+		    					
+		    					
+		    				}
+		    				//Bottom
+		    				else if (coyFunctions.inBounds(x,y,bX,bEndX,bBottomY-(b.height/5),bBottomY)) {
+		    					brickPing.play(gameVolume);
+		    					b.changeHealth(-1);
+		    					if (flipCooldown <= 0) {
+		    						ball.bounceY();
+		    						debug.addToDebug(debugClass,"Hit bottom of "+b.getName());
+			    					flipCooldown = flipCooldownMax;
+		    					}
+		    					else {
+		    						debug.addToDebug(debugClass,"Hit bottom of "+b.getName()+" but on flip cooldown");
+		    						scoreMult = scoreMult * 2;
+		    					}
+		    					
+		    					
+		    				}
+		    				
+		    				//top
+		    				else if (coyFunctions.inBounds(x, bottomY, bX,bEndX,bY,bY+b.height/10)) {
+		    					brickPing.play(gameVolume);
+		    					b.changeHealth(-1);
+		    					if (flipCooldown <= 0) {
+		    						ball.bounceY();
+		    						debug.addToDebug(debugClass,"Hit top of "+b.getName());
+		    						flipCooldown = flipCooldownMax;
+		    					}
+		    					else {
+		    						debug.addToDebug(debugClass,"Hit top of "+b.getName()+" but on flip cooldown");
+		    						scoreMult = scoreMult * 2;
+		    					}
+		    					
+		    					
+		    					
+		    				}
+		    			}
+		    				
+		    		}		
+		    		
+		    	}
+		    	if (y >= height-(bat.height/2) && flipCooldown <=0) {
+		    		ball.resetPos();
+		    		debug.addToDebug(debugClass,"Ball Hit Bottom Of Map");
+		    		scoreMult = 1;
+		    		addScore(-5);
+		    		
+		    		flipCooldown = flipCooldownMax;
+		    	}
+		    	if (y <= 0 && flipCooldown <= 0) {
+		    		ball.bounceY();
+		    		wallPing.play(gameVolume);
+		    		debug.addToDebug(debugClass,"Ball Hit Top "+ ball.getVelocity());
+		    		flipCooldown = flipCooldownMax;
+		    		
+		    	}
+		    	else {
+		    		ball.movePos(ball.getVelocity());
+		    		
+		    		flipCooldown--;
+		    		flipCooldown = (int)coyFunctions.clamp(flipCooldown,0,flipCooldownMax);
+		    	}
+		    	
+		    	if (!anyBricksInPlay()) {
+		    		if (!gameEnded) {
+		    			ball.velocity = coyFunctions.makePoint(0, 0);
+			    		ball.setPos(coyFunctions.makePoint(width/2, height/2));
+			    		gameEnded = true;
+			    		balls = new ArrayList<GameObj>();
+			    		balls.add(ball);
+			    		for (int i = 1;i <= endBalls;i++) {
+			    			GameObj b = makeBall();
+			    			b.angle = i*19;
+			    			balls.add(b);
+			    			b.velocity = coyFunctions.makePoint(0, 0);
+				    		b.setPos(coyFunctions.makePoint(width/2, height/2));
+			    		}
+			    		
+		    		}
+		    	}
 	    	}
 	    	
-	    	if (!anyBricksInPlay()) {
-	    		if (!gameEnded) {
-	    			ball.velocity = coyFunctions.makePoint(0, 0);
-		    		ball.pos = coyFunctions.makePoint(width/2, height/2);
-		    		gameEnded = true;
-		    		
-	    		}
-	    	}
 	    }
 	    
 	    public boolean anyBricksInPlay() {
@@ -356,7 +376,7 @@ public class GameController {
 	     */
 	    public GameObj makeBat() {
 	    	debug.addToDebug(debugClass,"Attempting to make bat");
-	    	bat = new GameObj((width/2)-(batWidth/2), height-20, batWidth, batHeight,coyFunctions.makePoint(0, 0), Color.RED, debug,false,"bat");  
+	    	this.bat = new GameObj((width/2)-(batWidth/2), height-20, batWidth, batHeight,coyFunctions.makePoint(0, 0), Color.RED, debug,false,"bat");  
 	    	bat.initialize(graphicsContr);
 	    	debug.addToDebug(debugClass,"Object Bat added");
 	    	
@@ -370,7 +390,7 @@ public class GameController {
 	    	debug.addToDebug(debugClass,"Attempting to make ball");
 	    	Random random = new Random();
 	    	ballStartingVelocity = coyFunctions.makePoint(ballSpeed,ballSpeed);
-	    	ball = new GameObj(coyFunctions.clamp(random.nextInt(width),20,width-20),height/2,ballDiameter,ballDiameter,ballStartingVelocity,Color.WHITE,debug,true,"ball");
+	    	this.ball = new GameObj(coyFunctions.clamp(random.nextInt(width),20,width-20),height/2,ballDiameter,ballDiameter,ballStartingVelocity,Color.WHITE,debug,true,"ball");
 	    	ball.initialize(graphicsContr);
 	    	debug.addToDebug(debugClass,"Object Ball added with velocity "+ball.getVelocity());
 			return ball;

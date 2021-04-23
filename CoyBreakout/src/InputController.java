@@ -10,7 +10,6 @@ public class InputController {
 	CoyDebug debug;
 	CoyFunctions coyFunctions;
 	int previousGameTicks;
-	boolean paused;
 	
 	static String debugClass = "Input Controller";
 	
@@ -26,40 +25,47 @@ public class InputController {
 	}
 	
 	public void initialize() {
-		bat = gameContr.getBat();
+		
 		ball = gameContr.getBall();
 		width = gameContr.width;
 		height = gameContr.height;
-		paused = false;
 		
 	}
 	//This works, not sure what its complaining about. Warning suppressed.
 	void userKeyInteraction(KeyEvent event ) {
+		bat = gameContr.getBat();
 		switch ( event.getCode() )             
 	    {
 	      case LEFT:
 	      case A:
-	    	  if(bat.getPosX()>=batSpeed&&!paused) {
+	    	  if(bat.getPosX()>=batSpeed&&!gameContr.gamePaused) {
 	    		  bat.movePos(coyFunctions.makePoint(-batSpeed, 0));
 	    	  }
 	        break;
 	      case RIGHT:
 	      case D:
-	       	  if(bat.getPosX()<=width-bat.width-batSpeed&&!paused) {
+	       	  if(bat.getPosX()<=width-bat.width-batSpeed&&!gameContr.gamePaused) {
 	       		  bat.movePos(coyFunctions.makePoint(batSpeed, 0));
 	    	  }
 	        break;
 	      case ESCAPE:
 	    	  	gameContr.gameRunning = false;
 	    	  break;
+	      case ENTER:
+	    	  if (gameContr.gameEnded) {
+	    		  initialize();
+	    		  graphicsContr.startGame();
+	    		  gameContr.initialiseGame();
+	    		  gameContr.gameEnded = false;
+	    		  gameContr.gamePaused = true;
+	    	  }
+	    	  break;
 	      case SPACE:
-	    	  	if (!paused) {
-	    	  		paused = true;
+	    	  	if (!gameContr.gamePaused) {
 	    	  		gameContr.gamePaused = true;
 	    	  		debug.addToDebug(debugClass,"Game Paused");
 	    	  	}
 	    	  	else {
-	    	  		paused = false;
 	    	  		gameContr.gamePaused = false;
 	    	  		debug.addToDebug(debugClass,"Game Restarted");
 	    	  	}

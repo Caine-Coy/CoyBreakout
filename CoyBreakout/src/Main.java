@@ -22,6 +22,7 @@ public class Main extends Application{
 		//Setting window size
 		 int width = 500;         
 	     int height = 500;
+	     
 	     CoyDebug debug = new CoyDebug(true,true);
 	     //Passing current events to the debugger
 	     debug.addToDebug(debugClass,"Set Width to "+width);
@@ -37,7 +38,7 @@ public class Main extends Application{
 	     gameContr.graphicsContr = graphicsContr;
 	     
 	     debug.addToDebug(debugClass,"Graphics Controller Debug Started");
-	     
+	     window.setResizable(false);
 	     graphicsContr.start(window);
 	     gameContr.startGame();
 	     

@@ -20,7 +20,7 @@ public class GameObj {
 	GameController gameContr;
 	Point pos,startVelocity,velocity;
 	Color colour;
-	int width,height,x,y,startX,startY,health,brickArrayX,brickArrayY;
+	int width,height,x,y,startX,startY,health,brickArrayX,brickArrayY,angle;
 	String name,debugClass,type;
 	CoyDebug debug;
 	boolean circular,visible;
@@ -66,10 +66,10 @@ public class GameObj {
         
         this.type = type;
         
-        
+        angle = 1;
         
         colour = c;
-        this.circular = circular;
+        this.circular = isCircular;
         
         translate = new Translate();
         visible = true;
@@ -143,10 +143,20 @@ public class GameObj {
 	public int getPosX() {	
 		return x;
 	}
+	
+	public void setPosX(int x) {
+		this.x = x;
+	}
 	public int getPosY() {
 		return y;
 	}
-	
+	public void setPosY(int y) {
+		this.y = y;
+	}
+	public void setPos(Point point) {
+		setPosX(point.x);
+		setPosY(point.y);
+	}
 	public Translate getTranslate() {
 		return translate;
 	}
