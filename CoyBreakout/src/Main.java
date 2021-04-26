@@ -3,7 +3,11 @@ package src;
 //importing JavaFX required some edits to the java classpath in eclipse's setting.
 import javafx.application.Application;
 import javafx.stage.Stage;
-
+/**
+ * 
+ * @author 'Caine' / Joe Benson
+ *
+ */
 public class Main extends Application{
 	//the start method for java
 	String debugClass = "Main";
@@ -17,7 +21,9 @@ public class Main extends Application{
     {
         launch();
     }
-	//the start method for javaFX
+	/**
+	 * The start method for the program. called by Javafx
+	 */
 	public void start(Stage window){
 		//Setting window size
 		 int width = 500;         

@@ -17,7 +17,7 @@ import javafx.scene.text.TextAlignment;
 import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
 /**
- * 
+ * The View part of the MVC
  * @author 'Caine'/ Joe Benson
  *
  */
@@ -79,7 +79,9 @@ public class GraphicsController implements EventHandler<KeyEvent> {
 	     gameScene.setOnKeyPressed(this);
 	     debug.addToDebug(debugClass,"Window Initialized");
 	}
-	
+	/**
+	 * starts the game and clears up all the old instances of game objects. Called on first start and new game.
+	 */
 	public void startGame() {
 		 bat = null;
 		 ball = null;
@@ -93,7 +95,7 @@ public class GraphicsController implements EventHandler<KeyEvent> {
 	     Random rand = new Random();
 	     for (int x = 0; x < gameContr.brickColumns;x++) {
 	    	 for (int y= 0; y <gameContr.brickRows;y++) {
-	    		 brick = gameContr.makeBrick((x)+x*gameContr.brickWidth+x,y*gameContr.brickHeight+y,coyFunctions.clamp(rand.nextInt(brickHealth+1), 1, brickHealth));
+	    		 brick = gameContr.makeBrick((x)+x*gameContr.brickWidth,y*gameContr.brickHeight+y,coyFunctions.clamp(rand.nextInt(brickHealth+1), 1, brickHealth));
 	    		 brick.brickArrayX = x;
 	    		 brick.brickArrayY = y;
 	    		 brick.initialize(this);
@@ -111,17 +113,20 @@ public class GraphicsController implements EventHandler<KeyEvent> {
 	        // send the event to the controller
 	        inputContr.userKeyInteraction( event );
 	    }
-	
+	/**
+	 * called by the game controller on every frame after the game has run its code.
+	 */
 	public void update() {
 		synchronized(gameContr) {
 			
 			updateScreen();
 			updateUI();
-			tick++;
 		}
 		
 	}
-	
+	/**
+	 * Is in control of on screen text.
+	 */
 	public void updateUI() {
 		
 			String scoreText = "Score: "+gameContr.score;
@@ -140,7 +145,9 @@ public class GraphicsController implements EventHandler<KeyEvent> {
 			}
 			
 		}
-	
+	/**
+	 * Renders all visible game objects as well as painting the background black.
+	 */
 	public synchronized void updateScreen() {
 
 			//set the background black from 0,0 to max 
@@ -162,7 +169,14 @@ public class GraphicsController implements EventHandler<KeyEvent> {
 	    }
 	    
 	}
-	
+	/**
+	 * Called to print text onto the gamescreen
+	 * @param x int of the text
+	 * @param y int of the text
+	 * @param text 
+	 * @param fontSize double of the text
+	 * @param colour of the text
+	 */
 	public void displayText(int x,int y, String text,double fontSize, Color colour) {
 		gc.setFont(new Font(fontSize));
 		gc.setTextAlign(TextAlignment.CENTER);
@@ -170,22 +184,30 @@ public class GraphicsController implements EventHandler<KeyEvent> {
 		gc.fillText(text,x,y);
 		
 	}
-
+	/**
+	 * Renders objects as rectangles
+	 * @param go gameobject to display
+	 */
 	public void displayRectObj(GameObj go) {
 		gc.setFill(go.colour);
 		gc.fillRect(go.x,go.y,go.width,go.height);
 	}
+	/**
+	 * Renders objects as circles
+	 * @param go gameobject to display
+	 */
 	public void displayRoundObj(GameObj go) {
 		gc.setFill(go.colour);
 		gc.fillOval(go.x,go.y,go.width,go.height);
 	}
 
-	public Point moveObj(GameObj go,Point point){
-		//gc.setFill(go.colour);
-		Translate translate = go.getTranslate(); 
-		translate.translate(point.x,point.y);
-		
-		return point;
+	/**
+	 * Translates an object by a point to a new location
+	 * @param go the GameObj
+	 * @param point the required translation in point form
+	 */
+	public void moveObj(GameObj go,Point point){
+		Translate.translate(point.x,point.y);
 	}
 	
 	
