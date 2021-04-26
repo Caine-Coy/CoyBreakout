@@ -8,52 +8,52 @@ import java.util.Stack;
  * @version 1.0
  */
 public class CoyDebug {
-	
-	boolean printDebug;
-	boolean logDebug;
-	Stack<String> debugLog;
-	Date date;
-	String debugClass = "Debug";
-	public CoyFunctions coyFunctions;
-	
-	/**
-	 * 
-	 * @param print the debug to the console?
-	 * @param log the debug to a file? WIP
-	 */
-	public CoyDebug(boolean print, boolean log){
-		printDebug = print;
-		logDebug = log;
-		debugLog = new Stack<String>();
-		addToDebug(debugClass,"Debug Successfully Started");
-		coyFunctions = new CoyFunctions();
-		coyFunctions.debug = this;
-		addToDebug(debugClass,"Coyfunctions Successfully Started");
-	}
+    
+    boolean printDebug;
+    boolean logDebug;
+    Stack<String> debugLog;
+    Date date;
+    String debugClass = "Debug";
+    public CoyFunctions coyFunctions;
+    
+    /**
+     * 
+     * @param print the debug to the console?
+     * @param log the debug to a file? WIP
+     */
+    public CoyDebug(boolean print, boolean log){
+        printDebug = print;
+        logDebug = log;
+        debugLog = new Stack<String>();
+        addToDebug(debugClass,"Debug Successfully Started");
+        coyFunctions = new CoyFunctions();
+        coyFunctions.debug = this;
+        addToDebug(debugClass,"Coyfunctions Successfully Started");
+    }
 
-	/**
-	 * This is a general all purpose logging system. Stores data in
-	 * @param callingObject is the object that you want this log to be reported as.
-	 * @param string is the text you want put on the log
-	 */
-	public void addToDebug(String callingObject, String string) {
-		date = java.util.Calendar.getInstance().getTime();
-		String currDebugLog = (date+" : " +callingObject+ " : " + string);
-		debugLog.push(currDebugLog);
-		System.out.println(currDebugLog);
-	}
-	
-	/**
-	 * This catches errors and stores them in the debug log
-	 * @param callingObject is the object that you want this log to be reported as.
-	 * @param e is the exception message
-	 */
-	public void error(String callingObject, Exception e) {
-		date = java.util.Calendar.getInstance().getTime();
-		String currDebugLog = (date+" : CRITICAL ERROR!: " +callingObject+ " : " + e.getMessage());
-		debugLog.push(currDebugLog);
-		System.out.println(currDebugLog);
-	}
-	
-	
+    /**
+     * This is a general all purpose logging system. Stores data in
+     * @param callingObject is the object that you want this log to be reported as.
+     * @param string is the text you want put on the log
+     */
+    public void addToDebug(String callingObject, String string) {
+        date = java.util.Calendar.getInstance().getTime();
+        String currDebugLog = (date+" : " +callingObject+ " : " + string);
+        debugLog.push(currDebugLog);
+        System.out.println(currDebugLog);
+    }
+    
+    /**
+     * This catches errors and stores them in the debug log
+     * @param callingObject is the object that you want this log to be reported as.
+     * @param e is the exception message
+     */
+    public void error(String callingObject, Exception e) {
+        date = java.util.Calendar.getInstance().getTime();
+        String currDebugLog = (date+" : CRITICAL ERROR!: " +callingObject+ " : " + e.getMessage());
+        debugLog.push(currDebugLog);
+        System.out.println(currDebugLog);
+    }
+    
+    
 }
