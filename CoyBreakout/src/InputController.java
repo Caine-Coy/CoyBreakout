@@ -2,7 +2,11 @@ package src;
 
 
 import javafx.scene.input.KeyEvent;
-
+/**
+ * The Controller part of the MVC
+ * @author 'Caine'/Joe Benson
+ *
+ */
 public class InputController {
 	
 	GameController gameContr;
@@ -17,13 +21,18 @@ public class InputController {
 	
 	int width,height;
 	int batSpeed = 10;
-	
+	/**
+	 * 
+	 * @param debug an instance of the debug class
+	 */
 	public InputController(CoyDebug debug) {
 		this.debug = debug;
 		coyFunctions = debug.coyFunctions;
 		
 	}
-	
+	/**
+	 * starts the input controller, runs on new game to grab the new ball.
+	 */
 	public void initialize() {
 		
 		ball = gameContr.getBall();
@@ -31,7 +40,9 @@ public class InputController {
 		height = gameContr.height;
 		
 	}
-	//This works, not sure what its complaining about. Warning suppressed.
+	/*
+	 * Called on keypress, is in charge of all player input.
+	 */
 	void userKeyInteraction(KeyEvent event ) {
 		bat = gameContr.getBat();
 		switch ( event.getCode() )             
@@ -70,6 +81,9 @@ public class InputController {
 	    	  		debug.addToDebug(debugClass,"Game Restarted");
 	    	  	}
 	    	  break;
+	    	  //added to suppress and error from event.getcode()
+		default:
+			break;
 	    }
 	}
 

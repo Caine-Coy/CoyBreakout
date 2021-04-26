@@ -34,6 +34,7 @@ public class GameController {
 	 *A double controlling game sound volume. 
 	 */
 	double gameVolume = 0.1;
+	boolean musicLoaded;
 	
 	//Game Status Booleans
 	boolean gameRunning = true;
@@ -41,8 +42,8 @@ public class GameController {
 	boolean gameEnded = false;
 	
 	//defines screen size, the cooldown for collisions, and game score.
-	int width,height,flipCooldown,score,scoreMult;
-	int flipCooldownMax = 4;
+	int width,height,flipCooldown,score,scoreMult,flipCooldownLeft,flipCooldownRight,flipCooldownTop,flipCooldownBottom;
+	int flipCooldownMax = 3;
 	
 	//bat parameters
 	int batWidth;
@@ -59,9 +60,9 @@ public class GameController {
 	
 	//brick parameters
 	int brickWidth,brickHeight;
-	int brickColumns = 1;
-	int brickRows = 1;
-	int brickOffset = 20;
+	int brickColumns = 5;
+	int brickRows = 4;
+	int brickOffset = 30;
 	int brickMaxHealth = 3;
 	
 	//Frame Time Calculations
@@ -96,11 +97,18 @@ public class GameController {
 		 	//sets the cooldown to 0, so it can be ticked up when collisions happen
 		 	
 		 	
-		 	//loads all the audiofiles into memory
+		 	//tries to loads all the audiofiles into memory
+		 try {
 		 	batPing = new AudioClip(getClass().getResource("/resources/batPing.mp3").toString());
 		 	brickPing = new AudioClip(getClass().getResource("/resources/brickPing.mp3").toString());
 		 	brickBreak = new AudioClip(getClass().getResource("/resources/brickBreak.mp3").toString());
 		 	wallPing = new AudioClip(getClass().getResource("/resources/wallPing.mp3").toString());
+		 	musicLoaded = true;
+		 }
+		 catch(Exception e) {
+			 debug.error(debugClass, e);
+			 musicLoaded = false;
+		 }
 	        initialiseGame();
 	        //graphicsContr.update();
 	        t = new Thread( this::gameLoop );     //Starts the gameLoop thread
@@ -117,6 +125,10 @@ public class GameController {
 	    	score = 0;
 	    	scoreMult=1;
 	    	flipCooldown = 0;
+	    	flipCooldownLeft = 0;
+	    	flipCooldownRight = 0;
+	    	flipCooldownTop = 0;
+	    	flipCooldownBottom = 0;
 	    }
 	    
 	    /**
@@ -150,7 +162,7 @@ public class GameController {
 	    }
 	    
 	    /**
-	     * updates the ball position
+	     * updates the ball position and handles its collision.
 	     */
 	    void ballUpdate() {
 	    	ball = getBall();
@@ -159,6 +171,7 @@ public class GameController {
 			int endX = x+ball.width;
 			int bottomY = y+ball.height;
 			
+			//Fun game ended stuff
 	    	if (gameEnded) {
 	    		for (GameObj b:balls) {
 	    			b.setPosX((int)((width/2)-10+width/3*Math.cos(Math.toRadians(b.angle))));
@@ -178,9 +191,6 @@ public class GameController {
 	    		
 	    	}
 	    	else {
-	    		
-				
-				//Integer.toString(x);
 				//If you hit the wall this makes it bounce
 		    	if (endX >= width || x <=0) {
 		    		if (flipCooldown <= 0) {
@@ -188,13 +198,13 @@ public class GameController {
 		    				//This stops a bug where it would get stuck in the corner hitting both at once.
 			    			ball.bounceY();
 			    		}
-				    		ball.bounceX();
-				    		wallPing.play(gameVolume);
-				    		debug.addToDebug(debugClass,"Ball Hit Wall");
-				    		flipCooldown = flipCooldownMax;
+				    	ball.bounceX();
+				    	playMusic(wallPing);
+				    	debug.addToDebug(debugClass,"Ball Hit Wall");
+				    	flipCooldown = flipCooldownMax;
 		    		}	    		
 		    	}
-		    	
+		    	//Controls the bat collisions
 		    	if (ball.overlapping(bat)) {
 		    		int batX = bat.x;
 	    			int batY = bat.y;
@@ -205,7 +215,7 @@ public class GameController {
 		    			ball.bounceX();
 		    			ball.bounceY();
 		    			debug.addToDebug(debugClass,"Ball Hit Bat On The Left Side");
-		    			batPing.play(gameVolume);
+		    			playMusic(batPing);
 		    			
 		    			flipCooldown = flipCooldownMax;
 		    		}
@@ -214,14 +224,14 @@ public class GameController {
 		    			ball.bounceX();
 		    			ball.bounceY();
 		    			debug.addToDebug(debugClass,"Ball Hit Bat On The right Side");
-		    			batPing.play(gameVolume);
+		    			playMusic(batPing);
 		    			flipCooldown = flipCooldownMax;
 		    		}
 		    		//Top
 		    		else if (coyFunctions.inBounds(x, bottomY, batX, batEndX, batY, batBottomY-bat.height/5)) {
 		    			ball.bounceY();
 		    			debug.addToDebug(debugClass,"Ball Hit Bat On The Top");
-		    			batPing.play(gameVolume);
+		    			playMusic(batPing);
 		    			flipCooldown = flipCooldownMax;
 		    		}
 		    		//Bottom
@@ -244,13 +254,14 @@ public class GameController {
 		    			
 		    			if (ball.overlapping(b)) {
 		    				//Left Side
-		    				if (coyFunctions.inBounds(endX, y,bX,bX+(b.width/10), bY, bBottomY)) {
-		    					brickPing.play(gameVolume);
+		    				if (coyFunctions.inBounds(endX, y,bX,bX+(b.width/10), bY, bBottomY)&&flipCooldownLeft <= 0) {
+		    					playMusic(brickPing);
 		    					b.changeHealth(-1);
 		    					if (flipCooldown <= 0) {
 		    						ball.bounceX();
 			    					
 			    					flipCooldown = flipCooldownMax;
+			    					flipCooldownLeft = flipCooldownMax;
 			    					debug.addToDebug(debugClass,"Hit left of "+b.getName());
 		    					}
 		    					else {
@@ -263,13 +274,15 @@ public class GameController {
 		    					
 		    				}
 		    				//Right Side
-		    				else if (coyFunctions.inBounds(x, y, bEndX-b.width/10, bEndX, bY, bBottomY)) {
-		    					brickPing.play(gameVolume);
+		    				else if (coyFunctions.inBounds(x, y, bEndX-b.width/10, bEndX, bY, bBottomY)&&flipCooldownRight <= 0) {
+		    					playMusic(brickPing);
 		    					b.changeHealth(-1);
 		    					if (flipCooldown <= 0) {
 		    						ball.bounceX();
 		    						debug.addToDebug(debugClass,"Hit right of "+b.getName());
+
 			    					flipCooldown = flipCooldownMax;
+			    					flipCooldownRight = flipCooldownMax;
 		    					}
 		    					else {
 		    						debug.addToDebug(debugClass,"Hit right of "+b.getName()+" but on flip cooldown");
@@ -280,13 +293,14 @@ public class GameController {
 		    					
 		    				}
 		    				//Bottom
-		    				else if (coyFunctions.inBounds(x,y,bX,bEndX,bBottomY-(b.height/5),bBottomY)) {
-		    					brickPing.play(gameVolume);
+		    				else if (coyFunctions.inBounds(x,y,bX,bEndX,bBottomY-(b.height/5),bBottomY)&&flipCooldownBottom <= 0) {
+		    					playMusic(brickPing);
 		    					b.changeHealth(-1);
 		    					if (flipCooldown <= 0) {
 		    						ball.bounceY();
 		    						debug.addToDebug(debugClass,"Hit bottom of "+b.getName());
 			    					flipCooldown = flipCooldownMax;
+			    					flipCooldownBottom = flipCooldownMax;
 		    					}
 		    					else {
 		    						debug.addToDebug(debugClass,"Hit bottom of "+b.getName()+" but on flip cooldown");
@@ -297,13 +311,14 @@ public class GameController {
 		    				}
 		    				
 		    				//top
-		    				else if (coyFunctions.inBounds(x, bottomY, bX,bEndX,bY,bY+b.height/10)) {
-		    					brickPing.play(gameVolume);
+		    				else if (coyFunctions.inBounds(x, bottomY, bX,bEndX,bY,bY+b.height/10) && flipCooldownTop <= 0) {
+		    					playMusic(brickPing);
 		    					b.changeHealth(-1);
 		    					if (flipCooldown <= 0) {
 		    						ball.bounceY();
 		    						debug.addToDebug(debugClass,"Hit top of "+b.getName());
 		    						flipCooldown = flipCooldownMax;
+		    						flipCooldownTop = flipCooldownMax;
 		    					}
 		    					else {
 		    						debug.addToDebug(debugClass,"Hit top of "+b.getName()+" but on flip cooldown");
@@ -328,7 +343,7 @@ public class GameController {
 		    	}
 		    	if (y <= 0 && flipCooldown <= 0) {
 		    		ball.bounceY();
-		    		wallPing.play(gameVolume);
+		    		playMusic(wallPing);
 		    		debug.addToDebug(debugClass,"Ball Hit Top "+ ball.getVelocity());
 		    		flipCooldown = flipCooldownMax;
 		    		
@@ -337,6 +352,14 @@ public class GameController {
 		    		ball.movePos(ball.getVelocity());
 		    		
 		    		flipCooldown--;
+		    	 	flipCooldownLeft--;
+			    	flipCooldownRight--;
+			    	flipCooldownTop--;
+			    	flipCooldownBottom--;
+		    		flipCooldownLeft = (int)coyFunctions.clamp(flipCooldown,0,flipCooldownMax);
+		    		flipCooldownRight = (int)coyFunctions.clamp(flipCooldown,0,flipCooldownMax);
+		    		flipCooldownTop = (int)coyFunctions.clamp(flipCooldown,0,flipCooldownMax);
+		    		flipCooldownBottom = (int)coyFunctions.clamp(flipCooldown,0,flipCooldownMax);
 		    		flipCooldown = (int)coyFunctions.clamp(flipCooldown,0,flipCooldownMax);
 		    	}
 		    	
@@ -360,7 +383,19 @@ public class GameController {
 	    	}
 	    	
 	    }
-	    
+	    /**
+	     * Checks if the music is actually loaded and then plays the clip
+	     * @param clip Audioclip you want to play.
+	     */
+	    public void playMusic(AudioClip clip) {
+	    	if (musicLoaded) {
+	    		clip.play(gameVolume);
+	    	}
+	    }
+	    /**
+	     * Used to end the game.
+	     * @return if any bricks are visible on the screen
+	     */
 	    public boolean anyBricksInPlay() {
 	    	for (GameObj b : bricks) {
 	    		if (b.getVisible()) {
@@ -400,7 +435,7 @@ public class GameController {
 	     * Makes a brick at the requested coordinates with the given health
 	     * @param x int coordinate of the brick
 	     * @param y int coordinate of the brick
-	     * @param int health of the brick
+	     * @param health int health of the brick
 	     * @return the brick game object
 	     */
 	    public GameObj makeBrick(int x,int y,int health) {
@@ -415,31 +450,50 @@ public class GameController {
 	    	return brick;
 	    }
 	    
-	    
+	    /**
+	     * 
+	     * @return current bat in use by the game
+	     */
 	    public GameObj getBat() {
 	    	
 	    	return (bat);
 	    }
-	    
+	    /**
+	     * 
+	     * @return current ball in use by the game
+	     */
 	    public GameObj getBall() {
 	    	
 	    	return (ball);
 	    }
-
+	    
+	    /**
+	     * 
+	     * @return the arraylist of bricks.
+	     */
 	    public ArrayList<GameObj> getBricks() {
 	    	
 	    	return (bricks);
 	    }
 	    
+	    /**
+	     * 
+	     * @param toAdd int score to be added (can be negative for taking away)
+	     */
 	    public void addScore(int toAdd) {
 	    	score += toAdd*scoreMult;
 	    	debug.addToDebug(debugClass,"Total score: " + score);
 	    }
-	    
+	    /**
+	     * 
+	     * @return the max health of bricks in the game. set in GameController
+	     */
 	    public int getBrickMaxHealth() {
 	    	return brickMaxHealth;
 	    }
-	    
+	    /**
+	     * runs the graphics updater on the same thread as the gameloop method.
+	     */
 	    public synchronized void updateGraphics() {
 	    	Platform.runLater(graphicsContr::update);
 	    }
