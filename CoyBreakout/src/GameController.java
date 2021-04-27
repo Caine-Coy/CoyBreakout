@@ -111,7 +111,7 @@ public class GameController {
         this.width = width;
         this.height = height;
         coyFunctions = debug.coyFunctions;
-        batWidth = width;//4;
+        batWidth = width/4;
         brickWidth = width/brickColumns;
         brickHeight = (height/2)/brickRows-brickOffset;
         debug.addToDebug(debugClass,"Brick size set at W: "+brickWidth+" H: "+brickHeight);

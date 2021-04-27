@@ -69,7 +69,7 @@ public class GraphicsController implements EventHandler<KeyEvent> {
          window.setTitle("Breakout");
          this.window = window;
          //this creates a canvas for pixels to be drawn on.  
-         Canvas canvas = new Canvas (height,width);
+         Canvas canvas = new Canvas (width,height);
          gc = canvas.getGraphicsContext2D();
          //tells the game controller it is ready to make a bat.
          startGame();
