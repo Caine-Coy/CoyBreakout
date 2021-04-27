@@ -30,7 +30,7 @@ public class GameObj {
     /**
      * Prints the velocity vector to the debug logger.
      */
-    boolean printVelocity = true;
+    boolean printVelocity = false;
     
     
     /**
